@@ -391,9 +391,9 @@ void RenderSystemOpenGL::render_scene_cubemap(ComponentManager* comp){
 
     CameraComponent* cam = comp->get_principal_camera();
     if (cam != nullptr) {
-      cam_projection = cam->projection_;
-      cam_view = cam->view_;
-      cam_position = cam->position_;
+      cam_projection = cam->get_projection();
+      cam_view = cam->get_view();
+      cam_position = cam->get_position();
     }
     else { cam_projection = glm::perspective(90.0f, (float)(window_.get()->width_ / window_.get()->height_), 0.01f, 2000.0f); }
 
@@ -795,9 +795,9 @@ void RenderSystemOpenGL::ForwardRendering(ComponentManager* comp) {
 
   CameraComponent* cam = comp->get_principal_camera();
   if (cam != nullptr) {
-    cam_projection = cam->projection_;
-    cam_view = cam->view_;
-    cam_position = cam->position_;
+    cam_projection = cam->get_projection();
+    cam_view = cam->get_view();
+    cam_position = cam->get_position();
   }
   else { cam_projection = glm::perspective(90.0f, (float)(window_.get()->width_ / window_.get()->height_), 0.01f, 2000.0f); }
  
@@ -1087,9 +1087,9 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
   glm::mat4 cam_view = glm::mat4(1.0f);
 
   if (camera != nullptr) {
-      cam_pos = camera->position_;
-      cam_proj = camera->projection_;
-      cam_view = camera->view_;
+      cam_pos = camera->get_position();
+      cam_proj = camera->get_projection();
+      cam_view = camera->get_view();
   }
 
   Program* dir_light_prog = deferred_rendering_directionallight_program_.get();

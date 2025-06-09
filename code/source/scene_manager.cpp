@@ -479,28 +479,28 @@ int SceneManager::SaveNewScene(ComponentManager* component_manager, RenderSystem
 
     //Active, Mode, pitch, yaw, roll
     sqlite3_bind_int(prepared_stmt, 3, (int)c->is_active_);
-    sqlite3_bind_int(prepared_stmt, 4, static_cast<int>(c->mode_));
-    sqlite3_bind_double(prepared_stmt, 5, c->pitch_);
-    sqlite3_bind_double(prepared_stmt, 6, c->yaw_);
-    sqlite3_bind_double(prepared_stmt, 7, c->roll_);
+    sqlite3_bind_int(prepared_stmt, 4, static_cast<int>(c->get_mode()));
+    sqlite3_bind_double(prepared_stmt, 5, c->get_pitch());
+    sqlite3_bind_double(prepared_stmt, 6, c->get_yaw());
+    sqlite3_bind_double(prepared_stmt, 7, c->get_roll());
     //Position
-    sqlite3_bind_double(prepared_stmt, 8, c->position_.x);
-    sqlite3_bind_double(prepared_stmt, 9, c->position_.y);
-    sqlite3_bind_double(prepared_stmt, 10, c->position_.z);
+    sqlite3_bind_double(prepared_stmt, 8, c->get_position().x);
+    sqlite3_bind_double(prepared_stmt, 9, c->get_position().y);
+    sqlite3_bind_double(prepared_stmt, 10, c->get_position().z);
 
     //znear, far
-    sqlite3_bind_double(prepared_stmt, 11, c->znear_);
-    sqlite3_bind_double(prepared_stmt, 12, c->zfar_);
+    sqlite3_bind_double(prepared_stmt, 11, c->get_near());
+    sqlite3_bind_double(prepared_stmt, 12, c->get_far());
 
     //left, right, bottom, top
-    sqlite3_bind_double(prepared_stmt, 13, c->left_);
-    sqlite3_bind_double(prepared_stmt, 14, c->right_);
-    sqlite3_bind_double(prepared_stmt, 15, c->bottom_);
-    sqlite3_bind_double(prepared_stmt, 16, c->top_);
+    sqlite3_bind_double(prepared_stmt, 13, c->get_orthographic_left());
+    sqlite3_bind_double(prepared_stmt, 14, c->get_orthographic_right());
+    sqlite3_bind_double(prepared_stmt, 15, c->get_orthographic_bottom());
+    sqlite3_bind_double(prepared_stmt, 16, c->get_orthographic_top());
 
     //fov, aspect_ratio
-    sqlite3_bind_double(prepared_stmt, 17, c->fov_);
-    sqlite3_bind_double(prepared_stmt, 18, c->aspect_ratio_);
+    sqlite3_bind_double(prepared_stmt, 17, c->get_fov());
+    sqlite3_bind_double(prepared_stmt, 18, c->get_aspect_ratio());
 
     step_result = sqlite3_step(prepared_stmt);
     if (step_result != SQLITE_DONE) {
@@ -909,25 +909,22 @@ bool SceneManager::LoadScene(ComponentManager* component_manager, RenderSystem* 
 
     CameraComponent* c = component_manager->addComponent<CameraComponent>(entity_correspondance[entity_id]);
     c->is_active_ = is_active_;
-    c->mode_ = mode;
-    c->pitch_ = pitch;
-    c->yaw_ = yaw;
-    c->roll_ = roll;
-    c->position_ = glm::vec3(pos_x, pos_y, pos_z);
-    c->znear_ = znear;
-    c->zfar_ = zfar;
-    c->left_ = left;
-    c->right_ = right;
-    c->bottom_ = bottom;
-    c->top_ = top;
-    c->fov_ = fov;
-    c->aspect_ratio_ = aspect_ratio;
+    c->set_mode(mode);
+    c->set_pitch(pitch);
+    c->set_yaw(yaw);
+    c->set_roll(roll);
+    c->set_position(pos_x, pos_y, pos_z);
+    c->set_near(znear);
+    c->set_far(zfar);
+    c->set_orthographic_limits(left, right, bottom, top);
+    c->set_fov(fov);
+    c->set_aspect_ratio(aspect_ratio);
 
     //Force update
-    if (c->mode_ == CameraMode::kOrthographic) {
+    if (mode == CameraMode::kOrthographic) {
       c->SetOrthographic(left, right, bottom, top, znear, zfar);
     }
-    else if (c->mode_ == CameraMode::kPerspective) {
+    else if (mode == CameraMode::kPerspective) {
       c->SetPerspective(fov, aspect_ratio, znear, zfar);
     }
     c->UpdateCamera({}, 0.0f);

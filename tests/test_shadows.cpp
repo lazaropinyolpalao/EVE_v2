@@ -13,9 +13,9 @@ int main(int, char**) {
 
 	// #### CAMERA ####
 	engine.getComponentManager()->NewPerspectiveCamera(45.0f, (float)window_w / (float)window_h, 1.0f, 2000.0f);
-	engine.getComponentManager()->get_principal_camera()->position_ = glm::vec3(0.0f, 0.0f, 0.0f);
-	engine.getComponentManager()->get_principal_camera()->pitch_ = 0.0f;
-	engine.getComponentManager()->get_principal_camera()->yaw_ = 0.0f;
+	engine.getComponentManager()->get_principal_camera()->set_position(0.0f, 0.0f, 0.0f);
+	engine.getComponentManager()->get_principal_camera()->set_pitch(0.0f);
+	engine.getComponentManager()->get_principal_camera()->set_yaw(0.0f);
 
 	engine.getRenderSystem()->resource_list_.addTextToRender("abcdefghijklmnopqrstuvwxyz", 15.0f, 15.0f, glm::vec3(1.0f, 0.0f, 0.5f), 1.0f);
 	engine.getRenderSystem()->resource_list_.addTextToRender("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 15.0f, 50.0f, glm::vec3(0.5, 0.8f, 0.2f), 1.0f);

@@ -915,45 +915,131 @@ void ImguiFunctions::DisplayEntityComponents(ComponentManager* comp, RenderSyste
 		//Camera component
 		if (nullptr != camera && ImGui::TreeNode("Camera component")) {
 			bool change = false;
-			if (ImGui::BeginCombo("##ModeCamera", camera_modes[(unsigned int)camera->mode_].c_str())) {
+			if (ImGui::BeginCombo("##ModeCamera", camera_modes[(unsigned int)camera->get_mode()].c_str())) {
 				//Hardcoded 2 because of camera_modes size
 				for (unsigned int j = 0; j < 2; ++j) {
-					bool selected = (j == (unsigned int)camera->mode_);
+					bool selected = (j == (unsigned int)camera->get_mode());
 					//If clicked, switch camera mode
 					if (ImGui::Selectable(camera_modes[j].c_str(), selected)) {
-						camera->mode_ = (CameraMode)j;
+						camera->set_mode((CameraMode)j);
 						change = true;
 					}
 				}
 				ImGui::End();
 			}
-			ImGui::Text("Position"); ImGui::SameLine();
-			if (ImGui::DragFloat3("##PositionCamera", &camera->position_.x)) { change = true; }
-			ImGui::Text("Pitch/Yaw"); ImGui::SameLine();
-			if (ImGui::DragFloat2("##RotationCamera", &camera->pitch_)) { change = true; }
-			ImGui::Text("Near/Far"); ImGui::SameLine();
-			if (ImGui::DragFloat2("##NearFarCamera", &camera->znear_)) { change = true; }
-			
-			ImGui::Text("Ortographic values"); ImGui::SameLine(); ImGui::Separator();
-			ImGui::Text("Left/Right"); ImGui::SameLine();
-			if (ImGui::DragFloat2("##LeftRightCamera", &camera->left_)) { change = true; }
-			ImGui::Text("Bottom/Top"); ImGui::SameLine();
-			if (ImGui::DragFloat2("##BottomTopCamera", &camera->bottom_)) { change = true; }
+			ImGui::Text("Position X/Y/Z");
+			float temp_pos_x = camera->get_position().x;
+			float temp_pos_y = camera->get_position().y;
+			float temp_pos_z = camera->get_position().z;
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##PositionCameraX", &temp_pos_x)) {
+				camera->set_position(temp_pos_x, temp_pos_y, temp_pos_z);
+			}
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##PositionCameraY", &temp_pos_y)) {
+				camera->set_position(temp_pos_x, temp_pos_y, temp_pos_z);
+			}
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##PositionCameraZ", &temp_pos_z)) {
+				camera->set_position(temp_pos_x, temp_pos_y, temp_pos_z);
+			}
+
+			ImGui::Text("Pitch/Yaw/Roll"); 
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			float temp_pitch = camera->get_pitch();
+			if (ImGui::DragFloat("##RotationCameraPitch", &temp_pitch)) {
+				change = true; 
+				camera->set_pitch(temp_pitch);
+			}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			float temp_yaw = camera->get_yaw();
+			if (ImGui::DragFloat("##RotationCameraYaw", &temp_yaw)) {
+				change = true;
+				camera->set_yaw(temp_yaw);
+			}
+
+			ImGui::Text("Near/Far"); 
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			float temp_near = camera->get_near();
+			if (ImGui::DragFloat("##NearCamera", &temp_near)) { 
+				change = true; 
+				camera->set_near(temp_near);
+			}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			float temp_far = camera->get_far();
+			if (ImGui::DragFloat("##FarCamera", &temp_far)) {
+				change = true;
+				camera->set_far(temp_far);
+			}
+
+			ImGui::Separator();
+			ImGui::Text("Ortographic values"); 
+
+			float temp_left = camera->get_orthographic_left();
+			float temp_right = camera->get_orthographic_right();
+			float temp_bottom = camera->get_orthographic_bottom();
+			float temp_top = camera->get_orthographic_top();
+
+			ImGui::Text("Left/Right"); 
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##LeftCamera", &temp_left)) {
+				change = true;
+				camera->set_orthographic_left(temp_left);
+			}
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##RightCamera", &temp_right)) {
+				change = true;
+				camera->set_orthographic_bottom(temp_right);
+			}
+
+
+			ImGui::Text("Bottom/Top"); 
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##TopCamera", &temp_top)) {
+				change = true;
+				camera->set_orthographic_top(temp_top);
+			}
+
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##BottomCamera", &temp_bottom)) {
+				change = true;
+				camera->set_orthographic_bottom(temp_bottom);
+			}
 
 			ImGui::Text("Perspective values"); ImGui::SameLine(); ImGui::Separator();
 			ImGui::Text("FOV  "); ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
-			if(ImGui::DragFloat("##FOVCamera", &camera->fov_, 0.5f, 20.0f, 120.0f, "%.2f")){change = true;}
+			float temp_fov = camera->get_fov();
+			if(ImGui::DragFloat("##FOVCamera", &temp_fov, 0.5f, 20.0f, 120.0f, "%.2f")){
+				change = true;
+				camera->set_fov(temp_fov);
+			}
 
 			ImGui::Separator();
 			ImGui::Text("Camera Speed");
-			if (ImGui::DragFloat("##SpeedCamera", &camera->speed_, 0.1f, 0.1f, 5.0f, "%.2f")) { change = true; }
+			float temp_speed = camera->get_speed();
+			if (ImGui::DragFloat("##SpeedCamera", &temp_speed, 0.1f, 0.1f, 5.0f, "%.2f")) {
+				change = true;
+				camera->set_speed(temp_speed);
+			}
 			
 			if (change) {
-				if(camera->mode_ == CameraMode::kOrthographic){
-					camera->SetOrthographic(camera->left_, camera->right_, camera->bottom_, camera->top_, camera->znear_, camera->zfar_);
+				if(camera->get_mode() == CameraMode::kOrthographic) {
+					camera->SetOrthographic(camera->get_orthographic_left(), 
+											camera->get_orthographic_right(), 
+											camera->get_orthographic_bottom(), 
+											camera->get_orthographic_top(), 
+								camera->get_near(), camera->get_far());
 				}
 				else {
-					camera->SetPerspective(camera->fov_, camera->aspect_ratio_, camera->znear_, camera->zfar_);
+					camera->SetPerspective(camera->get_fov(),
+							camera->get_aspect_ratio(),
+							camera->get_near(), camera->get_far());
 				}
 				//Updat the camera without moving it
 				camera->UpdateCamera({}, 0.0f);

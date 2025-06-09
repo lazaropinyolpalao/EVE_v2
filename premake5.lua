@@ -76,11 +76,11 @@ for j, prj in ipairs(projects_names) do
     elseif(prj == "PR02_Audio") then files{"tests/test_audio.cpp"}
     end
 
-    includedirs {"./deps/","./include/","./tests/"}
+    includedirs {"./deps/","./code/**","./tests/"}
     files { 
       -- CPPs No longer needed since we use a static library now
-        "include/*.hpp",
-        "include/*.h",
+        "code/headers/*.hpp",
+        "code/headers/*.h",
         "deps/imgui/*.hpp",
         "deps/imgui/*.h"
     }
@@ -91,12 +91,12 @@ project("Enhanced_Valencian_Engine")
   kind "StaticLib"     
   location"./build/"
   targetdir "./compiledlibs/%{cfg.buildcfg}"
-  includedirs {"./deps/","./include/", "./src/"}
+  includedirs {"./deps/","./code/**"}
   files{
-    "src/*.cpp",
-    "src/*.cc",
-    "include/*.hpp",
-    "include/*.h",
+    "code/source/**.cpp",
+    "code/source/**.cc",
+    "code/headers/**.hpp",
+    "code/headers/**.h",
     "deps/imgui/*.*"
   }
   --It requires the CONAN added libraries to compile
