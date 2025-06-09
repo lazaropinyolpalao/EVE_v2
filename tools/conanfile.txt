@@ -1,0 +1,32 @@
+[requires]
+#motherfuckingimgui
+imgui/cci.20230105+1.89.2.docking
+#windows
+glfw/3.3.8
+#opengl_extension_wrangler
+glew/2.2.0			
+#objloader
+tinyobjloader/2.0.0-rc10
+#math
+glm/cci.20230113
+#image_loader
+stb/cci.20230920
+#openal
+openal-soft/1.22.2
+#sqlite
+sqlitecpp/3.3.1
+#render_text
+freetype/2.13.2
+[generators]
+premake
+
+[imports]
+./res/bindings, imgui_impl_glfw.cpp -> ../imgui
+./res/bindings, imgui_impl_opengl3.cpp -> ../imgui
+./res/bindings, imgui_impl_opengl3_loader.h -> ../imgui
+./res/bindings, imgui_impl_glfw.h -> ../imgui
+./res/bindings, imgui_impl_opengl3.h -> ../imgui
+./res/bindings, imgui_impl_dx11.cpp -> ../imgui
+./res/bindings, imgui_impl_dx11.h -> ../imgui
+./res/bindings, imgui_impl_win32.cpp -> ../imgui
+./res/bindings, imgui_impl_win32.h -> ../imgui

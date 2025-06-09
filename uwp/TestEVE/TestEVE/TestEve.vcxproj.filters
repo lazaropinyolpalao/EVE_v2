@@ -1,0 +1,137 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Común">
+      <UniqueIdentifier>9d8c62e8-be70-4c76-80fe-795dfa2beb28</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Activos">
+      <UniqueIdentifier>ce2d957f-8ba8-4a03-b0d3-2b32d659eb52</UniqueIdentifier>
+      <Extensions>bmp;fbx;gif;jpg;jpeg;tga;tiff;tif;png</Extensions>
+    </Filter>
+    <Filter Include="Contenido">
+      <UniqueIdentifier>571c09b4-4ec5-420e-858f-7427e988deb5</UniqueIdentifier>
+    </Filter>
+    <ClInclude Include="Common\DirectXHelper.h">
+      <Filter>Común</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StepTimer.h">
+      <Filter>Común</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DeviceResources.h">
+      <Filter>Común</Filter>
+    </ClInclude>
+    <ClCompile Include="Common\DeviceResources.cpp">
+      <Filter>Común</Filter>
+    </ClCompile>
+    <ClInclude Include="Content\Sample3DSceneRenderer.h">
+      <Filter>Contenido</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SampleFpsTextRenderer.h">
+      <Filter>Contenido</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ShaderStructures.h">
+      <Filter>Contenido</Filter>
+    </ClInclude>
+    <ClCompile Include="Content\Sample3DSceneRenderer.cpp">
+      <Filter>Contenido</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\SampleFpsTextRenderer.cpp">
+      <Filter>Contenido</Filter>
+    </ClCompile>
+    <FxCompile Include="Content\SamplePixelShader.hlsl">
+      <Filter>Contenido</Filter>
+    </FxCompile>
+    <FxCompile Include="Content\SampleVertexShader.hlsl">
+      <Filter>Contenido</Filter>
+    </FxCompile>
+    <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="Assets\SplashScreen.scale-200.png">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="Assets\Square150x150Logo.scale-200.png">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.scale-200.png">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="Assets\Wide310x150Logo.scale-200.png">
+      <Filter>Activos</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="TestEveMain.cpp" />
+    <ClCompile Include="pch.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="TestEveMain.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Assets\include\audio.hpp" />
+    <ClInclude Include="Assets\include\boss.hpp" />
+    <ClInclude Include="Assets\include\component_system.hpp" />
+    <ClInclude Include="Assets\include\cubemap.hpp" />
+    <ClInclude Include="Assets\include\deferred_framebuffer.hpp" />
+    <ClInclude Include="Assets\include\defines.hpp" />
+    <ClInclude Include="Assets\include\depth_map.hpp" />
+    <ClInclude Include="Assets\include\engine.hpp" />
+    <ClInclude Include="Assets\include\framebuffer_to_texture.hpp" />
+    <ClInclude Include="Assets\include\imgui_functions.hpp" />
+    <ClInclude Include="Assets\include\light.hpp" />
+    <ClInclude Include="Assets\include\program.hpp" />
+    <ClInclude Include="Assets\include\render_system.hpp" />
+    <ClInclude Include="Assets\include\render_system_directx11.hpp" />
+    <ClInclude Include="Assets\include\render_system_opengl.hpp" />
+    <ClInclude Include="Assets\include\resources.hpp" />
+    <ClInclude Include="Assets\include\scene_manager.hpp" />
+    <ClInclude Include="Assets\include\shader.hpp" />
+    <ClInclude Include="Assets\include\texture.hpp" />
+    <ClInclude Include="Assets\include\tinyobj.hpp" />
+    <ClInclude Include="Assets\include\vertex.hpp" />
+    <ClInclude Include="Assets\include\window.hpp" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\StoreLogo.png">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\TestEVE\AppX\Assets\textures\wall.jpg">
+      <Filter>Activos</Filter>
+    </Image>
+    <Image Include="..\x64\Debug\TestEVE\AppX\Assets\textures\wall2.jpg">
+      <Filter>Activos</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include="Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\DebugXbox\Enhanced_Valencian_Engine.idb" />
+    <None Include="Assets\DebugXbox\Enhanced_Valencian_Engine.pdb" />
+    <None Include="..\x64\Debug\TestEVE\AppX\Assets\meshes\capsule.tinyobj">
+      <Filter>Activos</Filter>
+    </None>
+    <None Include="..\x64\Debug\TestEVE\AppX\Assets\meshes\cube.tinyobj">
+      <Filter>Activos</Filter>
+    </None>
+    <None Include="default_pixel_shader_color.shader" />
+    <None Include="default_vertex_shader.shader" />
+    <None Include="..\x64\Debug\TestEVE\AppX\Assets\default_pixel_shader_color.shader">
+      <Filter>Activos</Filter>
+    </None>
+    <None Include="..\x64\Debug\TestEVE\AppX\Assets\default_vertex_shader.shader">
+      <Filter>Activos</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="Assets\DebugXbox\Enhanced_Valencian_Engine.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="TestEve.rc" />
+  </ItemGroup>
+</Project>
