@@ -28,6 +28,9 @@ enum class TreeComponentErrors {
  * @brief Tree component that allows being parent/child of another component
  */
 struct TreeComponent {
+	//Friend declaration to update transformations 
+	// through the tree component at the component manager
+	friend struct ComponentManager;
 
 	/** Parent component of the TreeComponent */
 	size_t parent_;

@@ -204,6 +204,18 @@ TreeComponentErrors ComponentManager::make_parent(size_t &parent_id, size_t &chi
 
   tree_has_changed_ = true;
 
+  //Add the transform matrix to the child and propagate
+  TransformComponent* parent_trans = get_component<TransformComponent>(parent_id);
+  TransformComponent* child_trans = get_component<TransformComponent>(child_id);
+
+  if (nullptr != parent_trans && nullptr != child_trans) {
+
+      child_trans->SetParentMatrix(parent_trans->GetTransform());
+
+    UpdateChildTransforms(child_id);
+  }
+
+
   return TreeComponentErrors::kOK;
 }
 
@@ -245,6 +257,16 @@ TreeComponentErrors ComponentManager::remove_parent(size_t entity_id) {
   //Remove parent
   child->parent_ = 0;
   tree_has_changed_ = true;
+
+  //Update the transform of this entitry and the childs to remove the reference to the parent
+  TransformComponent* trans = get_component<TransformComponent>(entity_id);
+  if (nullptr != trans) {
+    trans->SetParentMatrix(glm::mat4(1.0f));
+    UpdateChildTransforms(entity_id);
+  }
+
+
+
   return TreeComponentErrors::kOK;
 }
 
@@ -388,6 +410,57 @@ bool ComponentManager::IsMyChild(size_t search_id, size_t possible_child){
   return is_parent;
 }
 
+void ComponentManager::CheckChildTransformUpdates(){
+    static size_t tree_hash = typeid(TreeComponent).hash_code();
+    static size_t transf_hash = typeid(TransformComponent).hash_code();
+
+    std::vector<component_node<TransformComponent>>* transform_components =
+        &(*static_cast<component_list<TransformComponent>*>(components_classes_.find(transf_hash)->second.get())).components_;
+    size_t transf_size = transform_components->size();
+
+    TransformComponent* temp = nullptr;
+    for (unsigned int i = 0; i < transf_size; ++i) {
+        temp = &(transform_components->at(i).data_);
+        //Update the child transforms of the given entity
+        if (temp->updated_) {
+            UpdateChildTransforms(transform_components->at(i).entity_id_);
+        }
+    }
+
+}
+
+void ComponentManager::UpdateChildTransforms(size_t parent_id){
+
+    TreeComponent* parent = get_component<TreeComponent>(parent_id);
+    TransformComponent* parent_transform = get_component<TransformComponent>(parent_id);
+
+    if (nullptr == parent || nullptr == parent_transform) {return;}
+
+    //Set the parent matrix of every child as the parent
+    //Does nothing if there's no childs
+    TransformComponent* child_transform;
+    for (int i = 0; i < parent->num_children_; ++i) {
+        child_transform = get_component<TransformComponent>(parent->children_[i]);
+
+        //Some childs may not have a transform, such as cameras
+        if (nullptr != child_transform) {
+
+            //Update the parent matrix stored in the child
+            //child_transform->parent = parent_transform->absolute;
+            child_transform->SetParentMatrix(parent_transform->GetTransform());
+
+            //Update the children transforms of the childrens
+            UpdateChildTransforms(parent->children_[i]);
+        }
+
+    }
+
+    //Mark as the parent has updated the childrens
+    parent_transform->updated_ = false;
+
+}
+
+/** 
 glm::mat4 ComponentManager::get_parent_transform_matrix(size_t entity_id) {
 
   static size_t tree_hash = typeid(TreeComponent).hash_code();
@@ -443,7 +516,7 @@ glm::mat4 ComponentManager::get_parent_transform_matrix(size_t entity_id) {
     if (transform_components->at(i).entity_id_ == temp_id) {
 
       //Get the transform
-      parent_transforms[temp_id] = transform_components->at(i).data_.GetMatrix();
+      parent_transforms[temp_id] = transform_components->at(i).data_.GetRelativeMatrix();
 
       //Remove the entity of the vector
       copy_entities.erase(copy_entities.begin());
@@ -463,6 +536,7 @@ glm::mat4 ComponentManager::get_parent_transform_matrix(size_t entity_id) {
 
   return t;
 }
+ */
 //##
 
 //## Methods to create prefilled entities
@@ -569,6 +643,14 @@ void ComponentManager::ResetComponentSystem() {
 
   num_entities_ = 0;
   
+}
+void ComponentManager::Update(){
+
+    //Update graph tree	        
+    if (tree_has_changed_) {update_tree();}
+
+    CheckChildTransformUpdates();
+
 }
 bool ComponentManager::CustomUnorderedMapContains(size_t val) {
     bool exists = false;

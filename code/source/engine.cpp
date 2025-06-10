@@ -115,6 +115,10 @@ void Engine::AddTexture(std::string filepath){
 
 
 void Engine::Update(){
+  //Update the component manager needed elements
+  component_manager_->Update();
+
+
   render_system_->Update();
 
   //Display Imgui functions
@@ -129,10 +133,6 @@ void Engine::Update(){
   ImguiFunctions::ImguiFunctionCalls(component_manager_.get(), render_system_.get(), scene_manager_.get());
 #endif 
 
-  //Update graph tree	        
-  if (component_manager_->tree_has_changed_) {
-    component_manager_->update_tree();
-  }
 
 }
  

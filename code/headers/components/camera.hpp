@@ -21,6 +21,9 @@ enum class CameraMode {
  * @brief Camera component that provides a projection of the scene
  */
 struct CameraComponent {
+	//Friend declaration to update transformations 
+	// through the tree component at the component manager
+	friend struct ComponentManager;
 
 	/** Whether the camera is active or not */
 	bool is_active_;

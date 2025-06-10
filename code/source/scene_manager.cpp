@@ -342,17 +342,18 @@ int SceneManager::SaveNewScene(ComponentManager* component_manager, RenderSystem
     sqlite3_bind_int(prepared_stmt, 1, (int)i);
     sqlite3_bind_int(prepared_stmt, 2, (int)transform_components->at(i).entity_id_);
     //Position xyz
-    sqlite3_bind_double(prepared_stmt, 3, (double)t->position_.x);
-    sqlite3_bind_double(prepared_stmt, 4, (double)t->position_.y);
-    sqlite3_bind_double(prepared_stmt, 5, (double)t->position_.z);
+    glm::vec3 position = t->GetPosition(), rotation = t->GetRotation(), scale = t->GetScale();
+    sqlite3_bind_double(prepared_stmt, 3, (double)position.x);
+    sqlite3_bind_double(prepared_stmt, 4, (double)position.y);
+    sqlite3_bind_double(prepared_stmt, 5, (double)position.z);
     //Rotation xyz
-    sqlite3_bind_double(prepared_stmt, 6, (double)t->rotation_.x);
-    sqlite3_bind_double(prepared_stmt, 7, (double)t->rotation_.y);
-    sqlite3_bind_double(prepared_stmt, 8, (double)t->rotation_.z);
+    sqlite3_bind_double(prepared_stmt, 6, (double)rotation.x);
+    sqlite3_bind_double(prepared_stmt, 7, (double)rotation.y);
+    sqlite3_bind_double(prepared_stmt, 8, (double)rotation.z);
     //Scale xyz
-    sqlite3_bind_double(prepared_stmt, 9, (double)t->scale_.x);
-    sqlite3_bind_double(prepared_stmt, 10, (double)t->scale_.y);
-    sqlite3_bind_double(prepared_stmt, 11, (double)t->scale_.z);
+    sqlite3_bind_double(prepared_stmt, 9, (double)scale.x);
+    sqlite3_bind_double(prepared_stmt, 10, (double)scale.y);
+    sqlite3_bind_double(prepared_stmt, 11, (double)scale.z);
 
 
     step_result = sqlite3_step(prepared_stmt);

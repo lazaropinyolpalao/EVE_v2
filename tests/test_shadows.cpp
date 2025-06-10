@@ -110,7 +110,6 @@ int main(int, char**) {
 	float dt;
 	if (window) {
 	  while (window->is_open() && !window->return_last_input().escape) {
-			engine.Update();
 
 			//Smooth update, limited to framelimit
 			if (window->tick()) {
@@ -122,6 +121,9 @@ int main(int, char**) {
 				//Rotate the capsule
 				//engine.getComponentManager()->get_component<TransformComponent>(capsule)->AddRotationY(dt*0.25f);
 			}
+
+
+			engine.Update();
 
 			engine.Render();
 			//printf("Input a is pressed: %s\n", (input.a ? "true" : "false"));

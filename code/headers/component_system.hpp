@@ -590,13 +590,19 @@ struct ComponentManager {
 	 */
 	bool IsMyChild(size_t search_id, size_t possible_child);
 
+	/** Loops through the entities in order to update the childs */
+	void CheckChildTransformUpdates();
+
+	/** Updates the transforms of the childrens starting from the given parent entity */
+	void UpdateChildTransforms(size_t parent_id);
+
 	/**
 	 * @brief Find all parent transformations of an entity and return the resulting matrix
 	 *
 	 * @param entity_id Which entity to retrieve the transformations
 	 * @return glm::mat4 Final transformation matrix
 	 */
-	glm::mat4 get_parent_transform_matrix(size_t entity_id);
+	//glm::mat4 get_parent_transform_matrix(size_t entity_id);
 	//##
 
 	//Methods that return an entity with already added components, eg:
@@ -658,6 +664,9 @@ struct ComponentManager {
 	 * @brief Removes all entities, their components, and frees al resources from the component manager
 	 */
 	void ResetComponentSystem();
+
+	/** Run the commands that are necessary each frame */
+	void Update();
 
 
 	//For debug information

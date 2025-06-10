@@ -9,6 +9,9 @@
  * @brief Renderer component that allows an entity to be drawn
  */
 struct RendererComponent {
+	//Friend declaration to update transformations 
+	// through the tree component at the component manager
+	friend struct ComponentManager;
 
 	/** Whether the renderer component has a mesh assigned */
 	bool isInit_;

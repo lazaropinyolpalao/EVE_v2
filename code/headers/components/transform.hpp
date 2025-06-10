@@ -6,16 +6,25 @@
 #include <glm/ext.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/rotate_vector.hpp>
+#include <glm/gtx/matrix_decompose.hpp>
 
 /**
  * @brief Transformation component that gives an object scale, rotation and translation
  */
 struct TransformComponent {
 
-	/** Absolute matrix, includes the transformation info from the parent objects */
-	glm::mat4 absolute;
+	//Friend declaration to update transformations 
+	// through the tree component at the component manager
+	friend struct ComponentManager;
+
+protected:
+	/** Parent matrix, includes the transformation info from the parent objects */
+	glm::mat4 parent;
 	/** Personal matrix of the transform component */
 	glm::mat4 relative;
+
+	/** Parent matrix multiplied by the relative */
+	glm::mat4 absolute;
 
 	/** Scale vector of the transform component */
 	glm::vec3 scale_;
@@ -23,9 +32,11 @@ struct TransformComponent {
 	glm::vec3 rotation_;
 	/** Position vector of the transform component */
 	glm::vec3 position_;
-	/** Wheter the data of the transform component has changed or not, used to update the main matrix of the transform component */
-	bool changed_;
 
+	/** Dirty flag to mark when the children of the tree need to be updated */
+	bool updated_;
+
+public:
 	TransformComponent();
 
 	/**
@@ -33,7 +44,14 @@ struct TransformComponent {
 	 *
 	 * @return glm::mat4 The main matrix of the transform component
 	 */
-	glm::mat4 GetMatrix();
+	glm::mat4 GetRelativeMatrix();
+	glm::mat4 GetParentMatrix();
+
+	glm::mat4 GetTransform();
+
+	glm::vec3 GetScale();
+	glm::vec3 GetRotation();
+	glm::vec3 GetPosition();
 
 	/**
 	 * @brief Sets the scale of the transform component
@@ -131,6 +149,19 @@ struct TransformComponent {
 	 */
 	TransformComponent* SetTranslation(glm::vec3 tsl);
 
+	TransformComponent* SetRotation(float x, float y, float z, bool radians = false);
+
+	TransformComponent* SetRotation(glm::vec3 rotation, bool radians = false);
+
+
+	void SetParentMatrix(glm::mat4 parent_matrix);
+
+private:
+	/** Updates the absolute matrix by multiplying the inherited for the local relative matrix */
+	void UpdateTransform();
+
+	/** Update the local relative matrix */
+	void UpdateRelativeMatrix();
 };
 
 #endif

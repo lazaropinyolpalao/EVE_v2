@@ -848,19 +848,33 @@ void ImguiFunctions::DisplayEntityComponents(ComponentManager* comp, RenderSyste
 
 		//Transform component
 		if(nullptr != transform && ImGui::TreeNode("Transform component")) {
-			ImGui::Text("Position"); ImGui::SameLine(); 
-			if (ImGui::DragFloat3("##PositionTransform", &transform->position_.x)) {
-				transform->changed_ = true;
-			}
-			ImGui::Text("Rotation"); ImGui::SameLine(); 
-			if(ImGui::DragFloat3("##RotationTransform", &transform->rotation_.x)) {
-				transform->changed_ = true;
-			}
-			ImGui::Text("Scale   "); ImGui::SameLine(); 
-			if(ImGui::DragFloat3("##ScaleTransform", &transform->scale_.x)) {
-				transform->changed_ = true;
-			}
-			transform->GetMatrix();
+			ImGui::Text("Position");
+			glm::vec3 position = transform->GetPosition();
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##PositionTransformX", &position.x)) {transform->SetTranslation(position);}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##PositionTransformY", &position.y)) {transform->SetTranslation(position);}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##PositionTransformZ", &position.z)) {transform->SetTranslation(position);}
+
+
+			ImGui::Text("Rotation");
+			glm::vec3 rotation = transform->GetRotation();
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if(ImGui::DragFloat("##RotationTransformX", &rotation.x)) {transform->SetRotation(rotation);}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##RotationTransformY", &rotation.y)) { transform->SetRotation(rotation);}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##RotationTransformZ", &rotation.z)) { transform->SetRotation(rotation); }
+
+			ImGui::Text("Scale   ");
+			glm::vec3 scale = transform->GetScale();
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if(ImGui::DragFloat("##ScaleTransformX", &scale.x)) {transform->SetScale(scale);}
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##ScaleTransformY", &scale.y)) { transform->SetScale(scale); }
+			ImGui::SameLine(); ImGui::SetNextItemWidth(50.0f);
+			if (ImGui::DragFloat("##ScaleTransformZ", &scale.z)) { transform->SetScale(scale); }
 			
 			ImGui::TreePop();
 		} 
@@ -1059,25 +1073,55 @@ void ImguiFunctions::DisplayEntityComponents(ComponentManager* comp, RenderSyste
 
 			ImGui::Text("Number of children %d", tree->num_children_);
 			if (comp->num_entities_ > 1) {
+				TreeComponent* parent_tree = comp->get_component<TreeComponent>(tree->parent_);
 
 				ImGui::Text("Parent entity: "); ImGui::SameLine();
-				if (tree->parent_ != 0) {sprintf_s(str, "%zd", tree->parent_);}
-				else{ sprintf_s(str, "%s", "No parent selected"); }
+				if (nullptr != parent_tree) {
+					sprintf_s(str, "%s", parent_tree->name);
+				}
+				else { sprintf_s(str, "%s", "No parent selected"); }
 				
 				if (tree->parent_ != 0 && ImGui::Button("Remove parent")) {
 					comp->remove_parent(selectedEntityComponent);
 				}
 				//*/
 				if (ImGui::BeginCombo("##SetNewParentCombo", str)) {
-					for (size_t i = 1; i <= comp->num_entities_; i++) {
+
+					TreeComponent* temp_tree = nullptr;
+					size_t temp_tree_id;
+
+					//Search all the entities on the tree component vector and only display the names of the ones that are not:
+					//A child of this entity, or a deleted entity
+					for (size_t i = 0; i < tree_vec->size(); i++) {
+						temp_tree_id = tree_vec->at(i).entity_id_;
+						temp_tree = &(tree_vec->at(i).data_);
+
 						std::vector<size_t>::iterator found = std::find(comp->deleted_entities_.begin(), comp->deleted_entities_.end(), i);
-						if (i != selectedEntityComponent && !comp->IsMyChild(selectedEntityComponent, i) && found == comp->deleted_entities_.end()) {
-							sprintf_s(str, "Entity %zd", i);
-							if (ImGui::Selectable(str, (i == selectedEntityComponent))) {
-								comp->make_parent(i, selectedEntityComponent);
+						if (temp_tree_id != selectedEntityComponent && !comp->IsMyChild(selectedEntityComponent, temp_tree_id)
+							&& found == comp->deleted_entities_.end()) {
+
+							sprintf_s(str, "%s", temp_tree->name);
+
+							if (ImGui::Selectable(str, (temp_tree_id == selectedEntityComponent))) {
+								comp->make_parent(temp_tree_id, selectedEntityComponent);
 							}
 						}
 					}
+
+					//for (size_t i = 1; i <= comp->num_entities_; i++) {
+
+
+
+					//	std::vector<size_t>::iterator found = std::find(comp->deleted_entities_.begin(), comp->deleted_entities_.end(), i);
+					//	if (i != selectedEntityComponent && !comp->IsMyChild(selectedEntityComponent, i) && found == comp->deleted_entities_.end()) {
+					//		sprintf_s(str, "%s", i);
+
+					//		
+					//		if (ImGui::Selectable(str, (i == selectedEntityComponent))) {
+					//			comp->make_parent(i, selectedEntityComponent);
+					//		}
+					//	}
+					//}
 					ImGui::EndCombo();
 				}
 				/**/

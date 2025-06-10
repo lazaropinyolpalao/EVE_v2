@@ -467,7 +467,7 @@ void RenderSystemOpenGL::render_elements_with_texture(ComponentManager* comp, Pr
     //Only draw if the
     if (r->isInit_ && r->mesh_->isInit_) {
       glm::mat4 trans = glm::mat4(1.0f);
-      if (nullptr != t) { trans = comp->get_parent_transform_matrix(id); }
+      if (nullptr != t) { trans = t->GetTransform(); }
       prog->SetMat4("transform", (float*)glm::value_ptr(trans));
       prog->SetBool("needs_light", r->needs_light_);
 
@@ -535,7 +535,7 @@ void RenderSystemOpenGL::render_elements_depthmap(ComponentManager* comp, Progra
     //Only draw if the
     if (r->isInit_ && r->mesh_->isInit_) {
       glm::mat4 trans = glm::mat4(1.0f);
-      if (nullptr != t) { trans = comp->get_parent_transform_matrix(id); }
+      if (nullptr != t) { trans = t->GetTransform(); }
       prog->SetMat4("transform", (float*)glm::value_ptr(trans));
 
       glBindBuffer(GL_ARRAY_BUFFER, r->mesh_->virtual_buffer_object_);
@@ -591,7 +591,7 @@ void RenderSystemOpenGL::render_light_elements(ComponentManager* comp, Program* 
       //Only draw if the renderer and mesh are init
       if (r->isInit_ && r->mesh_->isInit_) {
         glm::mat4 trans = glm::mat4(1.0f);
-        if (nullptr != t) { trans = comp->get_parent_transform_matrix(id); }
+        if (nullptr != t) { trans = t->GetTransform(); }
 
         prog->SetMat4("transform", (float*)glm::value_ptr(trans));
         prog->SetBool("receivesShadows", r->receives_shadows_);
@@ -668,7 +668,7 @@ void RenderSystemOpenGL::render_light_elements(ComponentManager* comp, Program* 
       //Only draw if the renderer and mesh are init
       if (r->isInit_ && r->mesh_->isInit_) {
         glm::mat4 trans = glm::mat4(1.0f);
-        if (nullptr != t) { trans = comp->get_parent_transform_matrix(id); }
+        if (nullptr != t) { trans = t->GetTransform(); }
 
         prog->SetMat4("transform", (float*)glm::value_ptr(trans));
         prog->SetBool("receivesShadows", r->receives_shadows_);
@@ -753,7 +753,7 @@ void RenderSystemOpenGL::render_light_elements(ComponentManager* comp, Program* 
       //Only draw if the renderer and mesh are init
       if (r->isInit_ && r->mesh_->isInit_) {
         glm::mat4 trans = glm::mat4(1.0f);
-        if (nullptr != t) { trans = comp->get_parent_transform_matrix(id); }
+        if (nullptr != t) { trans = t->GetTransform(); }
 
         prog->SetMat4("transform", (float*)glm::value_ptr(trans));
         prog->SetBool("receivesShadows", r->receives_shadows_);
@@ -1158,7 +1158,7 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
     //Only draw if the
     if (r->isInit_ && r->mesh_->isInit_) {
       glm::mat4 trans = glm::mat4(1.0f);
-      if (nullptr != t) { trans = comp->get_parent_transform_matrix(id); }
+      if (nullptr != t) { trans = t->GetTransform(); }
       elements_program->SetMat4("transform", glm::value_ptr(trans));
 
       // Activate textures if there are any
