@@ -428,13 +428,13 @@ int main(int, char**) {
 	std::map<size_t, TempStruct> positions_spec;
 
 	for (unsigned int i = 0; i < musics.size(); ++i) {
-		positions_music[musics.at(i)].original_pos = musics_transforms.at(i)->position_;
+		positions_music[musics.at(i)].original_pos = musics_transforms.at(i)->GetPosition();
 		positions_music[musics.at(i)].t = musics_transforms.at(i);
 		positions_music[musics.at(i)].temp_speed = rand() % 10;
 	}
 
 	for (unsigned int i = 0; i < spectators.size(); ++i) {
-		positions_spec[spectators.at(i)].original_pos = spectators_transforms.at(i)->position_;
+		positions_spec[spectators.at(i)].original_pos = spectators_transforms.at(i)->GetPosition();
 		positions_spec[spectators.at(i)].t = spectators_transforms.at(i);
 		positions_spec[spectators.at(i)].temp_speed = (rand() % 10) + 1;
 	}
