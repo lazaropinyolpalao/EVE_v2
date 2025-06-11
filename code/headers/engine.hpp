@@ -124,6 +124,7 @@ public:
 
 private:
 
+
     /** Window of the engine */
     std::unique_ptr<Window> window_;
     /** Component manager of the window */

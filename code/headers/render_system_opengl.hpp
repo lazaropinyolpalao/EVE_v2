@@ -35,6 +35,11 @@ public:
 	void ResetResources();
 	
 private:
+
+
+
+	void ResizeBuffers(int w, int h);
+
 	RenderSystemOpenGL() = delete;
 	/** Window of the engine */
 	std::unique_ptr<Window> window_;
@@ -44,6 +49,8 @@ private:
 	 * @brief Init the text rendering sources and map the characters
 	 */
 	bool InitTextResources();
+	bool InitLetterCharacters();
+	void ResetTextResources();
 
 	void RenderText(std::string text, float screen_x, float screen_y, float scale, glm::vec3 color);
 

@@ -1,10 +1,10 @@
 #include "engine.hpp"
 
 int main(int, char**) {
-	//*/
+	/*/
 	unsigned int const window_w = 1280, window_h = 720;
 	/*/
-	unsigned int const window_w = 1920, window_h = 1080;
+	unsigned int const window_w = 1280, window_h = 1280;
 	/**/
 	Engine engine = Engine(window_w, window_h);
 	Window* window = engine.getWindow();
@@ -18,7 +18,7 @@ int main(int, char**) {
 	engine.getComponentManager()->get_principal_camera()->set_yaw(0.0f);
 
 	engine.getRenderSystem()->resource_list_.addTextToRender("abcdefghijklmnopqrstuvwxyz", 15.0f, 15.0f, glm::vec3(1.0f, 0.0f, 0.5f), 1.0f);
-	engine.getRenderSystem()->resource_list_.addTextToRender("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 15.0f, 50.0f, glm::vec3(0.5, 0.8f, 0.2f), 1.0f);
+	//engine.getRenderSystem()->resource_list_.addTextToRender("ABCDEFGHIJKLMNOPQRSTUVWXYZ", 15.0f, 50.0f, glm::vec3(0.5, 0.8f, 0.2f), 1.0f);
 
 	// #### LIGHTS ####
 

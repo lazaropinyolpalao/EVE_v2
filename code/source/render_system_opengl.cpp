@@ -149,7 +149,7 @@ RenderSystemOpenGL::RenderSystemOpenGL(int window_w, int window_h){
   depthmap_directional_and_spotlight_shadows_ = std::make_unique<DepthMap>(SHADOWS_DIMENSIONS, DepthMapType::kTypeQuad);
   depthmap_pointlight_shadows_ = std::make_unique<DepthMap>(SHADOWS_DIMENSIONS, DepthMapType::kTypeCubeMap);
 
-  deferred_framebuffer_ = std::make_unique<DeferredFramebuffer>(window_->width_, window_->height_);
+  deferred_framebuffer_ = std::make_unique<DeferredFramebuffer>(window_->GetWindowWidth(), window_->GetWindowHeight());
 
   IsReady_ = true;
 
@@ -187,6 +187,13 @@ void RenderSystemOpenGL::Update(){
   window_->clear();
   window_->update_delta();
   window_->detect_events();
+
+  //If the deferred frame buffer size is different from the window size, resize it
+  int w = window_->GetWindowWidth(), h = window_->GetWindowHeight();
+  if (w != deferred_framebuffer_->dimensions_x ||
+      h != deferred_framebuffer_->dimensions_y) {
+      ResizeBuffers(w, h);
+  }
 }
 
 Window* RenderSystemOpenGL::getWindow()
@@ -221,7 +228,54 @@ void RenderSystemOpenGL::ResetResources(){
     lights_.point_.resize(0);
 }
 
+void RenderSystemOpenGL::ResizeBuffers(int w, int h){
+    deferred_framebuffer_->ResizeBuffer(w, h);
+
+    //ResetTextResources();
+}
+
 bool RenderSystemOpenGL::InitTextResources(){
+
+    InitLetterCharacters();
+
+    //Init buffers for rendering
+    glGenVertexArrays(1, &text_render_VAO);
+    glGenBuffers(1, &text_render_VBO);
+    glBindVertexArray(text_render_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, text_render_VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 4, NULL, GL_DYNAMIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
+
+    GLuint indexes_[] = {
+        0, 1, 3,
+        1, 2, 3
+    };
+    glGenBuffers(1, &text_render_IBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, text_render_IBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes_), indexes_, GL_STATIC_DRAW);
+
+    //Init the program for rendering text
+    render_text_program_ = std::make_unique<Program>();
+    {
+        std::unique_ptr<char> src_v{ Shader::ReadShaderFromFile(TEXT_RENDERING_VERTEX_SHADER) };
+        std::unique_ptr<char> src_f{ Shader::ReadShaderFromFile(TEXT_RENDERING_PIXEL_SHADER) };
+        render_text_program_->AttachShader(std::make_unique<Shader>(src_v.get(), ShaderType::VERTEX).get());
+        render_text_program_->AttachShader(std::make_unique<Shader>(src_f.get(), ShaderType::FRAGMENT).get());
+        render_text_program_->Link();
+    }
+
+    //Projection for the text
+    text_proj = glm::ortho(0.0f, (float)window_->GetWindowWidth(), 0.0f, (float)window_->GetWindowHeight());
+
+    return true;
+}
+
+bool RenderSystemOpenGL::InitLetterCharacters(){
+
     //Init the FreeType Library
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
@@ -291,41 +345,22 @@ bool RenderSystemOpenGL::InitTextResources(){
     //Clean resources
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
+}
 
-    //Init buffers for rendering
-    glGenVertexArrays(1, &text_render_VAO);
-    glGenBuffers(1, &text_render_VBO);
-    glBindVertexArray(text_render_VAO);
-    glBindBuffer(GL_ARRAY_BUFFER, text_render_VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 4 * 4, NULL, GL_DYNAMIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+void RenderSystemOpenGL::ResetTextResources(){
 
-
-    GLuint indexes_[] = {
-        0, 1, 3,
-        1, 2, 3
-    };
-    glGenBuffers(1, &text_render_IBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, text_render_IBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexes_), indexes_, GL_STATIC_DRAW);
-
-    //Init the program for rendering text
-    render_text_program_ = std::make_unique<Program>();
-    {
-        std::unique_ptr<char> src_v{ Shader::ReadShaderFromFile(TEXT_RENDERING_VERTEX_SHADER) };
-        std::unique_ptr<char> src_f{ Shader::ReadShaderFromFile(TEXT_RENDERING_PIXEL_SHADER) };
-        render_text_program_->AttachShader(std::make_unique<Shader>(src_v.get(), ShaderType::VERTEX).get());
-        render_text_program_->AttachShader(std::make_unique<Shader>(src_f.get(), ShaderType::FRAGMENT).get());
-        render_text_program_->Link();
+    //Clean the textures
+    for (int i = 0; i < characters_.size(); ++i) {
+        glDeleteTextures(1, &characters_[i].TextureID);
     }
 
-    //Projection for the text
-    text_proj = glm::ortho(0.0f, (float)window_->width_, 0.0f, (float)window_->height_);
+    characters_.clear();
 
-    return true;
+    InitLetterCharacters();
+
+
+    //Projection for the text
+    text_proj = glm::ortho(0.0f, (float)window_->GetWindowWidth(), 0.0f, (float)window_->GetWindowHeight());
 }
 
 void RenderSystemOpenGL::RenderText(std::string text, float screen_x, float screen_y, float scale, glm::vec3 color){
@@ -395,7 +430,11 @@ void RenderSystemOpenGL::render_scene_cubemap(ComponentManager* comp){
       cam_view = cam->get_view();
       cam_position = cam->get_position();
     }
-    else { cam_projection = glm::perspective(90.0f, (float)(window_.get()->width_ / window_.get()->height_), 0.01f, 2000.0f); }
+    else {
+        cam_projection = glm::perspective(90.0f,
+            (float)(window_.get()->GetWindowWidth() / window_.get()->GetWindowHeight()),
+            0.01f, 2000.0f);
+    }
 
     cubemap->program_->SetMat4("projection", (float*)glm::value_ptr(cam_projection));
     cubemap->program_->SetMat4("view", (float*)glm::value_ptr(cam_view));
@@ -799,7 +838,11 @@ void RenderSystemOpenGL::ForwardRendering(ComponentManager* comp) {
     cam_view = cam->get_view();
     cam_position = cam->get_position();
   }
-  else { cam_projection = glm::perspective(90.0f, (float)(window_.get()->width_ / window_.get()->height_), 0.01f, 2000.0f); }
+  else { 
+      cam_projection = glm::perspective(90.0f, 
+                            (float)(window_.get()->GetWindowWidth() / window_.get()->GetWindowHeight()), 
+                            0.01f, 2000.0f); 
+  }
  
   //Set camera values to all the programs
 
@@ -854,7 +897,7 @@ void RenderSystemOpenGL::ForwardRendering(ComponentManager* comp) {
       depthmap_directional_and_spotlight_shadows_->UnsetBuffer();
 
       //Reset viewport and render the elements with that depthmap and the directional light
-      glViewport(0, 0, window_.get()->width_, window_.get()->height_);
+      glViewport(0, 0, window_.get()->GetWindowWidth(), window_.get()->GetWindowHeight());
 
       render_elements_directional_light_->Use();
       //glClear(GL_DEPTH_BUFFER_BIT);
@@ -896,7 +939,7 @@ void RenderSystemOpenGL::ForwardRendering(ComponentManager* comp) {
       depthmap_directional_and_spotlight_shadows_->UnsetBuffer();
 
       //Reset viewport and render the elements with that depthmap and the directional light
-      glViewport(0, 0, window_.get()->width_, window_.get()->height_);
+      glViewport(0, 0, window_.get()->GetWindowWidth(), window_.get()->GetWindowHeight());
 
       render_elements_spotlight_->Use();
       //glClear(GL_DEPTH_BUFFER_BIT);
@@ -939,7 +982,7 @@ void RenderSystemOpenGL::ForwardRendering(ComponentManager* comp) {
       depthmap_pointlight_shadows_->UnsetBuffer();
 
       //Reset viewport and render the elements with that depthmap and the directional light
-      glViewport(0, 0, window_.get()->width_, window_.get()->height_);
+      glViewport(0, 0, window_.get()->GetWindowWidth(), window_.get()->GetWindowHeight());
 
       render_elements_pointlight_->Use();
       //glClear(GL_DEPTH_BUFFER_BIT);
@@ -1236,7 +1279,7 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
       glCullFace(GL_FRONT);
 
       //Reset viewport and render the elements with that depthmap and the directional light
-      glViewport(0, 0, window_.get()->width_, window_.get()->height_);
+      glViewport(0, 0, window_.get()->GetWindowWidth(), window_.get()->GetWindowHeight());
 
       //Render the scene quad with the shadow information
       deferred_rendering_directionallight_program_.get()->Use();
@@ -1277,7 +1320,7 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
       glCullFace(GL_FRONT);
 
       //Reset viewport and render the elements with that depthmap and the directional light
-      glViewport(0, 0, window_.get()->width_, window_.get()->height_);
+      glViewport(0, 0, window_.get()->GetWindowWidth(), window_.get()->GetWindowHeight());
 
       //Render the scene quad with the shadow information
       deferred_rendering_spotlight_program_->Use();
@@ -1325,7 +1368,7 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
       glCullFace(GL_FRONT);
 
       //Reset viewport and render the elements with that depthmap and the directional light
-      glViewport(0, 0, window_.get()->width_, window_.get()->height_);
+      glViewport(0, 0, window_.get()->GetWindowWidth(), window_.get()->GetWindowHeight());
 
       //Render the scene quad with the shadow information
       deferred_rendering_pointlight_program_->Use();
@@ -1368,12 +1411,17 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
   // TODO: Set postprocess texture to shader and aply postprocess
 
   //glDisable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
-  glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  for (unsigned int i = 0; i < resource_list_.screen_texts_.size(); i++) {
-      RenderingText* r = resource_list_.screen_texts_.at(i).get();
-      RenderText(r->text_, r->pos_x, r->pos_y, r->scale_, r->color_);
+
+  //Only draw text if it's ready
+  if(free_type_init){
+
+      glCullFace(GL_FRONT);
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      for (unsigned int i = 0; i < resource_list_.screen_texts_.size(); i++) {
+          RenderingText* r = resource_list_.screen_texts_.at(i).get();
+          RenderText(r->text_, r->pos_x, r->pos_y, r->scale_, r->color_);
+      }
   }
   glDisable(GL_BLEND);
 

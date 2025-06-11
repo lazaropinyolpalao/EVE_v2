@@ -209,9 +209,7 @@ CameraComponent* CameraComponent::UpdateCamera(Input i, float dt) {
 }
 
 
-void CameraComponent::set_mode(CameraMode m) {
-    mode_ = m;
-}
+void CameraComponent::set_mode(CameraMode m) {mode_ = m;}
 
 void CameraComponent::set_pitch(float pitch) {
     pitch_ = pitch;

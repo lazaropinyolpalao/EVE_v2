@@ -1,5 +1,6 @@
 #include "window.hpp"
 
+#include <iostream>
 #ifdef RENDER_OPENGL
 
 #include "imgui.h"
@@ -37,6 +38,8 @@ std::unique_ptr<Window> Window::create_opengl(int width, int height, const char*
   
   if (!win_handle_) {return nullptr;}
 
+
+
   //Mark the window as the current context
   glfwMakeContextCurrent(win_handle_);
 
@@ -48,10 +51,14 @@ std::unique_ptr<Window> Window::create_opengl(int width, int height, const char*
 
   Window window {win_handle_, width, height,glfwGetVideoMode(glfwGetPrimaryMonitor())->refreshRate };
 
+  //Resize callback
+  glfwSetWindowSizeCallback(win_handle_, [](GLFWwindow* window, int width, int height) {
+      resize(window, width, height);
+  });
+
   window.clear_color_ = color;
-  window.width_ = width;
-  window.height_ = height;
   window.window = win_handle_;
+
 
   //Stablish values for the update with limited frames
   window.refresh_rate_ = window.get_refresh_rate();
@@ -156,6 +163,15 @@ void Window::render() {
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   glfwSwapBuffers(window);
+}
+void Window::resize(GLFWwindow* window, int width, int height){
+    char buff[100];
+    sprintf_s(buff, "Resize to :%d/%d", width, height);
+    std::cerr << buff << std::endl;
+    glfwSetWindowSize(window, width, height);
+    
+    glViewport(0, 0, width, height);
+    
 }
 #endif
 
@@ -471,15 +487,13 @@ bool Window::is_open() const {
 }
 
 #ifdef RENDER_OPENGL
-Window::Window(GLFWwindow* wh, int w, int h, int refresh): window{wh},width_{w}, height_{h}, refresh_rate_ { refresh } {
+Window::Window(GLFWwindow* wh, int w, int h, int refresh): window{wh}, refresh_rate_ { refresh } {
   last_time_ = glfwGetTime();
   fps_step = 1.0 / refresh_rate_;
 }
 #endif
 
 Window::Window(Window& right) : window{ right.window } {
-  width_ = right.width_;
-  height_ = right.height_;
   clear_color_ = right.clear_color_;
   refresh_rate_ = right.refresh_rate_;
 
@@ -497,8 +511,6 @@ Window::Window(Window& right) : window{ right.window } {
 }
 
 Window::Window(Window&& right) : window{ right.window } {
-  width_ = right.width_;
-  height_ = right.height_;
   clear_color_ = right.clear_color_;
   refresh_rate_ = right.refresh_rate_;
 
@@ -515,6 +527,26 @@ Window::Window(Window&& right) : window{ right.window } {
   fps_step = 1.0 / refresh_rate_;
 
   right.window = 0;
+}
+
+int Window::GetWindowWidth(){
+    int w = 0;     int h = 0;
+    glfwGetWindowSize(window, &w, &h);
+    return w;
+}
+
+int Window::GetWindowHeight(){
+    int w = 0;     int h = 0;
+    glfwGetWindowSize(window, &w, &h);
+    return h;
+}
+
+ClearColor Window::GetWindowClearColor(){
+    return clear_color_;
+}
+
+void Window::SetWindowClearColor(ClearColor c){
+    clear_color_ = c;
 }
 
 

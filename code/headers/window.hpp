@@ -184,6 +184,12 @@ public:
   void render();
 
   /**
+   * @brief What to do in the events of resize
+   * 
+   */
+  static void resize(GLFWwindow* window, int width, int height);
+
+  /**
    * @brief Renders all the elements of the scene for the xbox window
    * 
    */
@@ -276,12 +282,17 @@ public:
   HWND window;
 
   #endif
+
+  int GetWindowWidth();
+
+  int GetWindowHeight();
+
+  ClearColor GetWindowClearColor();
+  void SetWindowClearColor(ClearColor c);
+
+protected:
   /** Window background color */
   ClearColor clear_color_;
-  /** Window width */
-  int width_;
-  /** Window height */
-  int height_;
   /** Refresh rate */
   int refresh_rate_;
   /** Time it needs to pass to adjust to framerate */

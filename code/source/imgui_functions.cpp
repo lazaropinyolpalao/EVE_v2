@@ -61,8 +61,11 @@ void ImguiFunctions::DisplayWindowData(Window* win, ComponentManager* comp){
 	if (openDisplayWindowData) {
 		ImGui::Begin("General info", &openDisplayWindowData);
 		
-		ImGui::Text("Screen size: %d x %d", win->width_, win->height_);
-		ImGui::ColorEdit4("Background color ", &(win->clear_color_.r));
+		ImGui::Text("Screen size: %d x %d", win->GetWindowWidth(), win->GetWindowHeight());
+		ClearColor c = win->GetWindowClearColor();
+		if (ImGui::ColorEdit4("Background color ", &c.r)) {
+			win->SetWindowClearColor(c);
+		}
 
 		float frames_this_second = (1.0f / ImGui::GetIO().DeltaTime);
 		ImGui::Text("FPS: %d", (int)frames_this_second);
