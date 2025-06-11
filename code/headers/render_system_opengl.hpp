@@ -36,9 +36,10 @@ public:
 	
 private:
 
+	int prev_width;
+	int prev_height;
 
-
-	void ResizeBuffers(int w, int h);
+	void ResizeWindowsAndBuffer(int w, int h);
 
 	RenderSystemOpenGL() = delete;
 	/** Window of the engine */
@@ -50,7 +51,6 @@ private:
 	 */
 	bool InitTextResources();
 	bool InitLetterCharacters();
-	void ResetTextResources();
 
 	void RenderText(std::string text, float screen_x, float screen_y, float scale, glm::vec3 color);
 

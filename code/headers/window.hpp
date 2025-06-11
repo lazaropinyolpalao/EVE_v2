@@ -184,12 +184,6 @@ public:
   void render();
 
   /**
-   * @brief What to do in the events of resize
-   * 
-   */
-  static void resize(GLFWwindow* window, int width, int height);
-
-  /**
    * @brief Renders all the elements of the scene for the xbox window
    * 
    */

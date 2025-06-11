@@ -30,7 +30,8 @@ std::unique_ptr<Window> Window::create_opengl(int width, int height, const char*
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-  glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+  glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 
   //Create the GLFWwindow and exit if it fails
@@ -46,15 +47,15 @@ std::unique_ptr<Window> Window::create_opengl(int width, int height, const char*
   //Sets the number of frames waiting to swap the render buffers
   glfwSwapInterval(1);
 
-  //Stablish the minimum and maximum values of the viewport
+  //Stablish the viewport size
   glViewport(0, 0, width, height);
 
   Window window {win_handle_, width, height,glfwGetVideoMode(glfwGetPrimaryMonitor())->refreshRate };
 
   //Resize callback
-  glfwSetWindowSizeCallback(win_handle_, [](GLFWwindow* window, int width, int height) {
-      resize(window, width, height);
-  });
+  //glfwSetWindowSizeCallback(win_handle_, [](GLFWwindow* window, int width, int height) {
+  //    resize(window, width, height);
+  //});
 
   window.clear_color_ = color;
   window.window = win_handle_;
@@ -62,6 +63,17 @@ std::unique_ptr<Window> Window::create_opengl(int width, int height, const char*
 
   //Stablish values for the update with limited frames
   window.refresh_rate_ = window.get_refresh_rate();
+
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  // Setup Platform/RendererComponent bindings
+  ImGui_ImplGlfw_InitForOpenGL(win_handle_, true);
+  ImGui_ImplOpenGL3_Init();
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+
   return std::make_unique<Window>(window);
   #endif
   return nullptr;
@@ -164,15 +176,7 @@ void Window::render() {
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
   glfwSwapBuffers(window);
 }
-void Window::resize(GLFWwindow* window, int width, int height){
-    char buff[100];
-    sprintf_s(buff, "Resize to :%d/%d", width, height);
-    std::cerr << buff << std::endl;
-    glfwSetWindowSize(window, width, height);
-    
-    glViewport(0, 0, width, height);
-    
-}
+
 #endif
 
 
@@ -531,13 +535,17 @@ Window::Window(Window&& right) : window{ right.window } {
 
 int Window::GetWindowWidth(){
     int w = 0;     int h = 0;
-    glfwGetWindowSize(window, &w, &h);
+    //glfwGetWindowSize(window, &w, &h);
+    glfwGetFramebufferSize(window, &w, &h);
+
     return w;
 }
 
 int Window::GetWindowHeight(){
     int w = 0;     int h = 0;
-    glfwGetWindowSize(window, &w, &h);
+    //glfwGetWindowSize(window, &w, &h);
+    glfwGetFramebufferSize(window, &w, &h);
+
     return h;
 }
 

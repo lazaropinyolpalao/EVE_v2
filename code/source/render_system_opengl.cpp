@@ -20,16 +20,6 @@ RenderSystemOpenGL::RenderSystemOpenGL(int window_w, int window_h){
     exit(EXIT_FAILURE);
   }
 
-  // Setup Dear ImGui context
-  IMGUI_CHECKVERSION();
-  ImGui::CreateContext();
-  ImGuiIO& io = ImGui::GetIO();
-  // Setup Platform/RendererComponent bindings
-  ImGui_ImplGlfw_InitForOpenGL(window_.get()->window, true);
-  ImGui_ImplOpenGL3_Init();
-  // Setup Dear ImGui style
-  ImGui::StyleColorsDark();
-
   //Initialize GLEW here, after the context is created
   //Start glfw or exit if failed
   GLenum err = glewInit();
@@ -153,6 +143,9 @@ RenderSystemOpenGL::RenderSystemOpenGL(int window_w, int window_h){
 
   IsReady_ = true;
 
+  prev_width = window_w;
+  prev_height = window_h;
+
   resource_list_.InitResources();
 
 
@@ -170,6 +163,7 @@ RenderSystemOpenGL::~RenderSystemOpenGL(){
         glDeleteBuffers(1, &text_render_VAO);
         glDeleteBuffers(1, &text_render_VBO);
     }
+
 }
 
 void RenderSystemOpenGL::Render(ComponentManager* comp){
@@ -184,16 +178,35 @@ void RenderSystemOpenGL::Render(ComponentManager* comp){
 
 void RenderSystemOpenGL::Update(){
   //Update
-  window_->clear();
-  window_->update_delta();
-  window_->detect_events();
 
-  //If the deferred frame buffer size is different from the window size, resize it
-  int w = window_->GetWindowWidth(), h = window_->GetWindowHeight();
-  if (w != deferred_framebuffer_->dimensions_x ||
-      h != deferred_framebuffer_->dimensions_y) {
-      ResizeBuffers(w, h);
-  }
+
+
+  //If the size of the window has changed, resize the buffers
+    int w = window_->GetWindowWidth(), h = window_->GetWindowHeight();
+    if (w != prev_width ||
+        h != prev_height) {
+
+
+        ResizeWindowsAndBuffer(w, h);
+
+        char buff[100];
+        sprintf_s(buff, "Resize to :%d/%d", w, h);
+        std::cerr << buff << std::endl;
+        glfwSetWindowSize(window_->window, w, h);
+        glViewport(0, 0, w, h);
+
+
+        //Adjust aspect ratio of cameras
+
+    }
+
+    prev_width = w;
+    prev_height = h;
+
+
+    window_->clear();
+    window_->update_delta();
+    window_->detect_events();
 }
 
 Window* RenderSystemOpenGL::getWindow()
@@ -228,10 +241,8 @@ void RenderSystemOpenGL::ResetResources(){
     lights_.point_.resize(0);
 }
 
-void RenderSystemOpenGL::ResizeBuffers(int w, int h){
+void RenderSystemOpenGL::ResizeWindowsAndBuffer(int w, int h){
     deferred_framebuffer_->ResizeBuffer(w, h);
-
-    //ResetTextResources();
 }
 
 bool RenderSystemOpenGL::InitTextResources(){
@@ -345,23 +356,10 @@ bool RenderSystemOpenGL::InitLetterCharacters(){
     //Clean resources
     FT_Done_Face(face);
     FT_Done_FreeType(ft);
+
+    return true;
 }
 
-void RenderSystemOpenGL::ResetTextResources(){
-
-    //Clean the textures
-    for (int i = 0; i < characters_.size(); ++i) {
-        glDeleteTextures(1, &characters_[i].TextureID);
-    }
-
-    characters_.clear();
-
-    InitLetterCharacters();
-
-
-    //Projection for the text
-    text_proj = glm::ortho(0.0f, (float)window_->GetWindowWidth(), 0.0f, (float)window_->GetWindowHeight());
-}
 
 void RenderSystemOpenGL::RenderText(std::string text, float screen_x, float screen_y, float scale, glm::vec3 color){
     // activate corresponding render state	
@@ -1240,9 +1238,10 @@ void RenderSystemOpenGL::DeferredRendering(ComponentManager* comp){
 
       
       glDrawElements(GL_TRIANGLES, (GLsizei)last_loaded_mesh->indexes_.size(), GL_UNSIGNED_INT, nullptr);
-
     }
   }
+
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   //Unset the deferred framebuffer to render into the default one
   deferred_framebuffer_->UnsetBuffer();

@@ -23,7 +23,6 @@ struct DeferredFramebuffer {
   GLuint virtual_buff_obj;
   GLuint index_buffer_object_;
   GLuint vertex_array_obj;
-  GLuint render_buffer_object_depth;
 
 #endif
   DeferredFramebuffer() = delete;
