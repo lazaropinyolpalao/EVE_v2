@@ -525,8 +525,8 @@ int SceneManager::SaveNewScene(ComponentManager* component_manager, RenderSystem
 
     sqlite3_bind_int(prepared_stmt, 1, (int)i);
     sqlite3_bind_int(prepared_stmt, 2, (int)tree_comps->at(i).entity_id_);
-    sqlite3_bind_int(prepared_stmt, 3, (int)t->parent_);
-    sqlite3_bind_text(prepared_stmt, 4, t->name, -1, SQLITE_STATIC);
+    sqlite3_bind_int(prepared_stmt, 3, (int)t->GetParentID());
+    sqlite3_bind_text(prepared_stmt, 4, t->GetEntityName(), -1, SQLITE_STATIC);
 
     if (sqlite3_step(prepared_stmt) != SQLITE_DONE) {
       printf("Failed at tree component %zd\n", i);
@@ -945,10 +945,10 @@ bool SceneManager::LoadScene(ComponentManager* component_manager, RenderSystem* 
 
       TreeComponent* t = component_manager->get_component<TreeComponent>(entity_correspondance[entity_id]);
       if (strlen(t_src) == 0) {
-          strcpy_s(t->name, "Unknown");
+          t->SetName("Unknown");
       }
       else {
-        strcpy_s(t->name, t_src);
+          t->SetName(t_src);
       }
   }
   sqlite3_reset(prepared_stmt);

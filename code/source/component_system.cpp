@@ -1,26 +1,6 @@
 #include "component_system.hpp"
 
 
-// #### TREE COMPONENT ####
-
-TreeComponent::TreeComponent() {
-  parent_ = 0;
-  num_children_ = 0;
-  for (int i = 0; i < MAX_TREE_CHILDREN; ++i) {
-    children_[i] = 0;
-  }
-
-  name[0] = '\0';
-}
-
-bool TreeComponent::HasParent() {
-  return parent_ != 0;
-}
-
-bool TreeComponent::HasChildren() {
-  return num_children_ > 0;
-}
-
 
 // #### COMPONENT MANAGER ####
 
@@ -48,6 +28,7 @@ size_t ComponentManager::new_entity() {
   tree_has_changed_ = true;
 
   //Add default components
+  addComponent<TransformComponent>(id);
   TreeComponent* t = addComponent<TreeComponent>(id);
   sprintf_s(t->name, "Entity - %zd", id);
 
@@ -544,7 +525,6 @@ size_t ComponentManager::NewRenderer(){
 
   size_t id = new_entity();
   addComponent<RendererComponent>(id);
-  addComponent<TransformComponent>(id);
 
   TreeComponent* t = get_component<TreeComponent>(id);
   sprintf_s(t->name, "New Renderer - %zd", id);
@@ -556,7 +536,6 @@ size_t ComponentManager::NewRenderer(std::shared_ptr<TinyObj>& mesh){
 
   size_t id = new_entity();
   addComponent<RendererComponent>(id)->Init(mesh);
-  addComponent<TransformComponent>(id);
 
   TreeComponent* t = get_component<TreeComponent>(id);
   strcpy_s(t->name, mesh->name_.c_str());

@@ -735,7 +735,7 @@ void ImguiFunctions::DrawTree(std::vector<component_node<TreeComponent>>* tree_c
 	}
 
 	if (t != nullptr) {
-		std::string temp_s = t->name;
+		std::string temp_s = t->GetEntityName();
 		if (temp_s.empty()) {
 			temp_s = "Unknown";
 		}
@@ -744,7 +744,7 @@ void ImguiFunctions::DrawTree(std::vector<component_node<TreeComponent>>* tree_c
 		temp_s.append(std::to_string(entity));
 
 		//sprintf_s(str, "Entity %zd", entity);
-		if (t->num_children_ == 0) {
+		if (t->GetNumChildren() == 0) {
 			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf;
 			flags = (selectedEntityComponent == entity? flags | ImGuiTreeNodeFlags_Selected: flags);
 			if (ImGui::TreeNodeEx(temp_s.c_str(), flags)) {
@@ -765,8 +765,10 @@ void ImguiFunctions::DrawTree(std::vector<component_node<TreeComponent>>* tree_c
 				openDisplayEntityComponents = true;
 			}
 			if (temp) {
+				const size_t* childs = t->GetChildrensIDs();
+
 				for (unsigned int i = 0; i < MAX_TREE_CHILDREN; ++i) {
-					if (t->children_[i] != 0) { DrawTree(tree_comps_, t->children_[i]); }
+					if (childs[i] != 0) { DrawTree(tree_comps_, childs[i]); }
 				}
 				ImGui::TreePop();
 			}
@@ -833,11 +835,11 @@ void ImguiFunctions::DisplayEntityComponents(ComponentManager* comp, RenderSyste
 		sprintf_s(str, "Entity id: %zd", selectedEntityComponent);
 		if (tree != nullptr) {
 
-			if (strlen(tree->name)==0) {
+			if (strlen(tree->GetEntityName())==0) {
 				ImGui::Text("Unknown");
 			}
 			else {
-				ImGui::Text(tree->name);
+				ImGui::Text(tree->GetEntityName());
 			}
 			ImGui::Text(str);
 		}
@@ -1072,19 +1074,28 @@ void ImguiFunctions::DisplayEntityComponents(ComponentManager* comp, RenderSyste
 
 			ImGui::Text("Name: "); ImGui::SameLine();
 			sprintf_s(str, "##TextRender%d", (unsigned int)selectedEntityComponent);
-			ImGui::InputText(str, tree->name, TEXT_RENDERING_MAX_SIZE);
 
-			ImGui::Text("Number of children %d", tree->num_children_);
+			//Copy the name into a temporal char array to edit
+			char name_str[TEXT_RENDERING_MAX_SIZE];
+			sprintf_s(name_str, "%s", tree->GetEntityName());
+
+			if (ImGui::InputText(str, name_str, TEXT_RENDERING_MAX_SIZE)) {
+				std::string temp_s = name_str;
+				tree->SetName(temp_s);
+			}
+			
+
+			ImGui::Text("Number of children %d", tree->GetNumChildren());
 			if (comp->num_entities_ > 1) {
-				TreeComponent* parent_tree = comp->get_component<TreeComponent>(tree->parent_);
+				TreeComponent* parent_tree = comp->get_component<TreeComponent>(tree->GetParentID());
 
 				ImGui::Text("Parent entity: "); ImGui::SameLine();
 				if (nullptr != parent_tree) {
-					sprintf_s(str, "%s", parent_tree->name);
+					sprintf_s(str, "%s", parent_tree->GetEntityName());
 				}
 				else { sprintf_s(str, "%s", "No parent selected"); }
 				
-				if (tree->parent_ != 0 && ImGui::Button("Remove parent")) {
+				if (tree->GetParentID() != 0 && ImGui::Button("Remove parent")) {
 					comp->remove_parent(selectedEntityComponent);
 				}
 				//*/
@@ -1103,7 +1114,7 @@ void ImguiFunctions::DisplayEntityComponents(ComponentManager* comp, RenderSyste
 						if (temp_tree_id != selectedEntityComponent && !comp->IsMyChild(selectedEntityComponent, temp_tree_id)
 							&& found == comp->deleted_entities_.end()) {
 
-							sprintf_s(str, "%s", temp_tree->name);
+							sprintf_s(str, "%s", temp_tree->GetEntityName());
 
 							if (ImGui::Selectable(str, (temp_tree_id == selectedEntityComponent))) {
 								comp->make_parent(temp_tree_id, selectedEntityComponent);
